@@ -1,0 +1,26 @@
+# Example Kubernetes Job for running distributed training across multiple
+# pods using the PyTorch elastic launcher (torchrun). This assumes a
+# container image built from the included Dockerfile and pushed to a
+# registry accessible by the cluster.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: distributed-training-job
+spec:
+  parallelism: 2
+  completions: 2
+  template:
+    spec:
+      containers:
+        - name: trainer
+          image: <your-registry>/distributed-ml-training:latest
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          env:
+            - name: MASTER_ADDR
+              value: "distributed-training-master"
+            - name: MASTER_PORT
+              value: "29500"
+      restartPolicy: Never
+  backoffLimit: 2
